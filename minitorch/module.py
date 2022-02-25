@@ -42,16 +42,18 @@ class Module:
             list of pairs: Contains the name and :class:`Parameter` of each ancestor parameter.
         """
         # TODO: Implement for Task 0.4.
-        res_list = [(k, v) for k, v in self._parameters.items()]
-        for name, submodule in self._modules.items():
-            for (k, v) in submodule.named_parameters():
-                res_list.append((name + "." + k, v))
-        return res_list
+        res = {}
+        for k, v in self._parameters.items():
+            res[k] = v
+        for n, m in self._modules.items():
+            for k, v in m.named_parameters().items():
+                res[f"{n}.{k}"] = v
+        return res
 
     def parameters(self):
         "Enumerate over all the parameters of this module and its descendents."
         # TODO: Implement for Task 0.4.
-        return [(i, v) for i, (k, v) in enumerate(self.named_parameters())]
+        return self.named_parameters().values()
 
     def add_parameter(self, k, v):
         """

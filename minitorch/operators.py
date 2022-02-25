@@ -31,7 +31,7 @@ def add(x, y):
 def neg(x):
     ":math:`f(x) = -x`"
     # TODO: Implement for Task 0.1.
-    return -x
+    return -1.0 * x
 
 
 def lt(x, y):
@@ -55,7 +55,7 @@ def max(x, y):
 def is_close(x, y):
     ":math:`f(x) = |x - y| < 1e-2`"
     # TODO: Implement for Task 0.1.
-    return math.abs(x, y) < 1e-2
+    return abs(x - y) < 1e-2
 
 
 def sigmoid(x):
@@ -93,7 +93,7 @@ def relu(x):
         float : relu value
     """
     # TODO: Implement for Task 0.1.
-    return x if x > 0 else 0
+    return x if x > 0 else 0.0
 
 
 EPS = 1e-6
@@ -217,7 +217,7 @@ def reduce(fn, start):
         if len(ls) == 0:
             return start
         else:
-            return fn(ls[-1], reduce_fn(ls.pop()))
+            return fn(ls[-1], reduce_fn(ls[:-1]))
 
     return reduce_fn
 

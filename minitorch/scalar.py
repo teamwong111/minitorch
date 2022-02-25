@@ -1,3 +1,4 @@
+import math
 from .autodiff import FunctionBase, Variable, History
 from . import operators
 import numpy as np
@@ -72,7 +73,7 @@ class Scalar(Variable):
 
     def __gt__(self, b):
         # TODO: Implement for Task 1.2.
-        return -LT.apply(b, self)
+        return LT.apply(b, self)
 
     def __eq__(self, b):
         # TODO: Implement for Task 1.2.
@@ -80,7 +81,7 @@ class Scalar(Variable):
 
     def __sub__(self, b):
         # TODO: Implement for Task 1.2.
-        return Add.apply(Neg.apply(self, b))
+        return Add.apply(self, Neg.apply(b))
 
     def __neg__(self):
         # TODO: Implement for Task 1.2.
@@ -191,12 +192,14 @@ class Mul(ScalarFunction):
     @staticmethod
     def forward(ctx, a, b):
         # TODO: Implement for Task 1.2.
+        ctx.save_for_backward(b, a)
         return operators.mul(a, b)
 
     @staticmethod
     def backward(ctx, d_output):
         # TODO: Implement for Task 1.4.
-        raise NotImplementedError("Need to implement for Task 1.4")
+        b, a = ctx.saved_values
+        return b * d_output, a * d_output
 
 
 class Inv(ScalarFunction):
@@ -205,12 +208,14 @@ class Inv(ScalarFunction):
     @staticmethod
     def forward(ctx, a):
         # TODO: Implement for Task 1.2.
+        ctx.save_for_backward(a)
         return operators.inv(a)
 
     @staticmethod
     def backward(ctx, d_output):
         # TODO: Implement for Task 1.4.
-        raise NotImplementedError("Need to implement for Task 1.4")
+        a = ctx.saved_values
+        return operators.inv_back(a, d_output)
 
 
 class Neg(ScalarFunction):
@@ -219,12 +224,12 @@ class Neg(ScalarFunction):
     @staticmethod
     def forward(ctx, a):
         # TODO: Implement for Task 1.2.
-        operators.neg(a)
+        return operators.neg(a)
 
     @staticmethod
     def backward(ctx, d_output):
         # TODO: Implement for Task 1.4.
-        raise NotImplementedError("Need to implement for Task 1.4")
+        return d_output * -1.0
 
 
 class Sigmoid(ScalarFunction):
@@ -233,12 +238,15 @@ class Sigmoid(ScalarFunction):
     @staticmethod
     def forward(ctx, a):
         # TODO: Implement for Task 1.2.
-        return operators.sigmoid(a)
+        b = operators.sigmoid(a)
+        ctx.save_for_backward(b)
+        return b
 
     @staticmethod
     def backward(ctx, d_output):
         # TODO: Implement for Task 1.4.
-        raise NotImplementedError("Need to implement for Task 1.4")
+        b = ctx.saved_values
+        return operators.mul(d_output, operators.mul(b, operators.add(1, operators.neg(b))))
 
 
 class ReLU(ScalarFunction):
@@ -247,12 +255,14 @@ class ReLU(ScalarFunction):
     @staticmethod
     def forward(ctx, a):
         # TODO: Implement for Task 1.2.
+        ctx.save_for_backward(a)
         return operators.relu(a)
 
     @staticmethod
     def backward(ctx, d_output):
         # TODO: Implement for Task 1.4.
-        raise NotImplementedError("Need to implement for Task 1.4")
+        a = ctx.saved_values
+        return operators.relu_back(a, d_output)
 
 
 class Exp(ScalarFunction):
@@ -261,12 +271,14 @@ class Exp(ScalarFunction):
     @staticmethod
     def forward(ctx, a):
         # TODO: Implement for Task 1.2.
+        ctx.save_for_backward(a)
         return operators.exp(a)
 
     @staticmethod
     def backward(ctx, d_output):
         # TODO: Implement for Task 1.4.
-        raise NotImplementedError("Need to implement for Task 1.4")
+        a = ctx.saved_values
+        return d_output * math.exp(a)
 
 
 class LT(ScalarFunction):
@@ -280,7 +292,7 @@ class LT(ScalarFunction):
     @staticmethod
     def backward(ctx, d_output):
         # TODO: Implement for Task 1.4.
-        raise NotImplementedError("Need to implement for Task 1.4")
+        return 0, 0
 
 
 class EQ(ScalarFunction):
@@ -294,7 +306,7 @@ class EQ(ScalarFunction):
     @staticmethod
     def backward(ctx, d_output):
         # TODO: Implement for Task 1.4.
-        raise NotImplementedError("Need to implement for Task 1.4")
+        return 0, 0
 
 
 def derivative_check(f, *scalars):

@@ -106,9 +106,9 @@ def test_sigmoid(a):
     * it is strictly increasing.
     """
     # TODO: Implement for Task 0.2.
-    assert sigmoid(a) < 1.0 and sigmoid(a) > 0.0
-    assert 1 - sigmoid(a) == sigmoid(-a)
-    assert sigmoid(0) == 0.5
+    assert sigmoid(a) <= 1.0 and sigmoid(a) >= 0.0
+    assert_close(1 - sigmoid(a), sigmoid(-a))
+    assert_close(sigmoid(0), 0.5)
     assert sigmoid(a - 1e-3) <= sigmoid(a + 1e-3)
 
 
@@ -130,7 +130,7 @@ def test_symmetric(a, b):
     """
     None
     # TODO: Implement for Task 0.2.
-    assert mul(a, b) == mul(b, a)
+    assert_close(mul(a, b), mul(b, a))
 
 
 @pytest.mark.task0_2
@@ -142,7 +142,7 @@ def test_distribute(x, y, z):
     """
     None
     # TODO: Implement for Task 0.2.
-    assert z * (x + y) == z * x + z * y
+    assert_close(z * (x + y), z * x + z * y)
 
 
 @pytest.mark.task0_2
@@ -153,7 +153,7 @@ def test_other(a):
     """
     None
     # TODO: Implement for Task 0.2.
-    assert mul(1, a) == a
+    assert_close(mul(1, a), a)
 
 
 # ## Task 0.3  - Higher-order functions
@@ -182,7 +182,7 @@ def test_sum_distribute(ls1, ls2):
     is the same as the sum of each element of `ls1` plus each element of `ls2`.
     """
     # TODO: Implement for Task 0.3.
-    raise NotImplementedError("Need to implement for Task 0.3")
+    assert_close(sum(ls1) + sum(ls2), sum(addLists(ls1, ls2))) 
 
 
 @pytest.mark.task0_3
