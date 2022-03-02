@@ -1,6 +1,6 @@
 import random
 from .operators import prod
-from numpy import array, float64, ndarray
+from numpy import array, float64, ndarray, sum
 import numba
 
 MAX_DIMS = 32
@@ -25,7 +25,11 @@ def index_to_position(index, strides):
     """
 
     # TODO: Implement for Task 2.1.
-    raise NotImplementedError("Need to implement for Task 2.1")
+    assert index.shape == strides.shape
+    position = 0
+    for x, y in zip(index, strides):
+        position += x * y
+    return position
 
 
 def to_index(ordinal, shape, out_index):
@@ -45,7 +49,9 @@ def to_index(ordinal, shape, out_index):
 
     """
     # TODO: Implement for Task 2.1.
-    raise NotImplementedError("Need to implement for Task 2.1")
+    for i in range(len(shape) - 1, -1, -1):
+        out_index[i] = ordinal % shape[i]
+        ordinal = ordinal // shape[i]
 
 
 def broadcast_index(big_index, big_shape, shape, out_index):
@@ -66,7 +72,15 @@ def broadcast_index(big_index, big_shape, shape, out_index):
         None : Fills in `out_index`.
     """
     # TODO: Implement for Task 2.2.
-    raise NotImplementedError("Need to implement for Task 2.2")
+    big_len = len(big_shape)
+    small_len = len(shape)
+    while(big_len and small_len):
+        if big_shape[big_len - 1] == shape[small_len - 1]:
+            out_index[small_len - 1] = big_index[big_len - 1]
+        elif shape[small_len - 1] == 1:
+            out_index[small_len - 1] = 0
+        big_len -= 1
+        small_len -= 1
 
 
 def shape_broadcast(shape1, shape2):
@@ -83,9 +97,30 @@ def shape_broadcast(shape1, shape2):
     Raises:
         IndexingError : if cannot broadcast
     """
-    # TODO: Implement for Task 2.2.
-    raise NotImplementedError("Need to implement for Task 2.2")
-
+    # TODO: Implement for Task 2.2.\
+    res = []
+    len1 = len(shape1)
+    len2 = len(shape2)
+    while(len1 or len2):
+        if len1 and len2:
+            if shape1[len1 - 1] == shape2[len2 - 1]:
+                res.insert(0, shape1[len1 - 1])
+            else:
+                if shape1[len1 - 1] == 1:
+                    res.insert(0, shape2[len2 - 1])
+                elif shape2[len2 - 1] == 1:
+                    res.insert(0, shape1[len1 - 1])
+                else:
+                    raise(IndexingError)
+            len1 -= 1
+            len2 -= 1
+        elif len1:
+            res.insert(0, shape1[len1 - 1])
+            len1 -= 1
+        elif len2:
+            res.insert(0, shape2[len2 - 1])
+            len2 -= 1
+    return tuple(res)
 
 def strides_from_shape(shape):
     layout = [1]
@@ -192,7 +227,7 @@ class TensorData:
         ), f"Must give a position to each dimension. Shape: {self.shape} Order: {order}"
 
         # TODO: Implement for Task 2.1.
-        raise NotImplementedError("Need to implement for Task 2.1")
+        return TensorData(storage=self._storage, shape=tuple(self._shape[i] for i in order), strides=tuple(self._strides[i] for i in order))
 
     def to_string(self):
         s = ""
