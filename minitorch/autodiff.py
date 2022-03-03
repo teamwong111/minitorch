@@ -56,7 +56,7 @@ class Variable:
         """
         if d_output is None:
             d_output = 1.0
-        backpropagate(self, d_output)
+        backpropagate(self, self.expand(d_output)) # use `expand` solve `grad` problem  
 
     @property
     def derivative(self):
@@ -280,7 +280,7 @@ class FunctionBase:
         index = 0
         for index, item in enumerate(inputs):
             if not is_constant(item):
-                res_list.append((item, derivatives[index]))
+                res_list.append((item, item.expand(derivatives[index]))) # use `expand` solve `grad` problem by jzwung
         return res_list
 
 

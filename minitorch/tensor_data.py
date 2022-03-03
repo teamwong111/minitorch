@@ -25,7 +25,6 @@ def index_to_position(index, strides):
     """
 
     # TODO: Implement for Task 2.1.
-    assert index.shape == strides.shape
     position = 0
     for x, y in zip(index, strides):
         position += x * y
@@ -227,7 +226,7 @@ class TensorData:
         ), f"Must give a position to each dimension. Shape: {self.shape} Order: {order}"
 
         # TODO: Implement for Task 2.1.
-        return TensorData(storage=self._storage, shape=tuple(self._shape[i] for i in order), strides=tuple(self._strides[i] for i in order))
+        return TensorData(storage=self._storage, shape=tuple(self.shape[i] for i in order), strides=tuple(self._strides[i] for i in order))
 
     def to_string(self):
         s = ""

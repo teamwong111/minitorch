@@ -151,14 +151,15 @@ def make_tensor_backend(tensor_ops, is_cuda=False):
             @staticmethod
             def forward(ctx, a):
                 # TODO: Implement for Task 2.3.
-                ctx.save_for_backward(a)
-                return exp_map(a)
+                b = exp_map(a)
+                ctx.save_for_backward(b)
+                return b
 
             @staticmethod
             def backward(ctx, grad_output):
                 # TODO: Implement for Task 2.4.
-                a = ctx.saved_values
-                return mul_zip(grad_output, exp_map(a))
+                b = ctx.saved_values
+                return mul_zip(grad_output, b)
 
         class Sum(Function):
             @staticmethod
@@ -195,23 +196,27 @@ def make_tensor_backend(tensor_ops, is_cuda=False):
             @staticmethod
             def forward(ctx, a, b):
                 # TODO: Implement for Task 2.3.
+                ctx.save_for_backward(a.shape, b.shape)
                 return lt_zip(a, b)
 
             @staticmethod
             def backward(ctx, grad_output):
                 # TODO: Implement for Task 2.4.
-                return 0, 0
+                a_shape, b_shape = ctx.saved_values
+                return zeros(a_shape), zeros(b_shape)
 
         class EQ(Function):
             @staticmethod
             def forward(ctx, a, b):
                 # TODO: Implement for Task 2.3.
+                ctx.save_for_backward(a.shape, b.shape)
                 return eq_zip(a, b)
 
             @staticmethod
             def backward(ctx, grad_output):
                 # TODO: Implement for Task 2.4.
-                return 0, 0
+                a_shape, b_shape = ctx.saved_values
+                return zeros(a_shape), zeros(b_shape)
 
         class IsClose(Function):
             @staticmethod
@@ -366,13 +371,14 @@ def tensor(ls, backend=TensorFunctions, requires_grad=False):
 # Gradient check for tensors
 
 
-def grad_central_difference(f, *vals, arg=0, epsilon=1e-6, ind=None):
+def grad_central_difference(f, *vals, arg=0, epsilon=1e-6, index=None):
     x = vals[arg]
     up = zeros(x.shape)
-    up[ind] = epsilon
+    up[index] = epsilon
     vals1 = [x if j != arg else x + up for j, x in enumerate(vals)]
     vals2 = [x if j != arg else x - up for j, x in enumerate(vals)]
-    delta = f(*vals1).sum() - f(*vals2).sum()
+    f1 = f(*vals1)
+    delta = f1.sum() - f(*vals2).sum()
 
     return delta[0] / (2.0 * epsilon)
 
@@ -396,12 +402,12 @@ but was expecting derivative %f from central difference.
 """
 
     for i, x in enumerate(vals):
-        ind = x._tensor.sample()
-        check = grad_central_difference(f, *vals, arg=i, ind=ind)
+        index = x._tensor.sample()
+        check = grad_central_difference(f, *vals, arg=i, index=index)
         np.testing.assert_allclose(
-            x.grad[ind],
+            x.grad[index],
             check,
             1e-2,
             1e-2,
-            err_msg=err_msg % (f, vals, x.grad[ind], i, ind, check),
+            err_msg=err_msg % (f, vals, x.grad[index], i, index, check),
         )
